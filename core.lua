@@ -190,11 +190,12 @@ ftg:SetScript("OnEvent", function(self, event, ...) self[event](self, event, ...
 ftg:SetScript("OnUpdate", QueueInspect)
 ftg:RegisterEvent("ADDON_LOADED")
 
---[[
-	Register slash commands and events
---]]
 function ftg:ADDON_LOADED(event, name)
 	if (ADDON_NAME ~= name) then return end
+	-- load Blizzard_DebugTools
+	if (debug and not IsAddOnLoaded("Blizzard_DebugTools")) then
+		LoadAddOn("Blizzard_DebugTools")
+	end
 
 	-- slash commands
 
@@ -203,7 +204,7 @@ function ftg:ADDON_LOADED(event, name)
 	self:RegisterEvent("INSPECT_READY")
 	--self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	--self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	self:RegisterEvent("UNIT_CONNECTION") -- to exclude offline players from queing for inspect
+	self:RegisterEvent("UNIT_CONNECTION")
 end
 
 function ftg:INSPECT_READY(event, guid)
@@ -226,9 +227,10 @@ function ftg:INSPECT_READY(event, guid)
 	Debug("Got data for", name, "spec:", spec)
 	ClearInspectPlayer(name)
 	UnitsAwaitingInspect[guid] = nil
+	DevTools_Dump(GroupSpecs)
 end
 
-function ftg:CleanGroup(numGroupMembers, groupType)
+function ftg:CleanGroupCache()
 	for guid in pairs(GroupCache) do
 		local name = GroupCache[guid]["name"]
 		if (not UnitInRaid(name) and not UnitInParty(name)) then
@@ -248,13 +250,11 @@ function ftg:CleanGroup(numGroupMembers, groupType)
 		end
 	end
 
-	for spec in pairs(GroupSpecs) do
-		Debug(spec)
-	end
+	DevTools_Dump(GroupSpecs)
 end
 
 function ftg:ScanGroup()
-	self:CleanGroup()
+	self:CleanGroupCache()
 	local numGroupMembers = GetNumGroupMembers()
 	if (numGroupMembers <= 0) then return end
 

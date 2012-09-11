@@ -1,0 +1,8 @@
+﻿## Interface: 50001
+## Title: FillThatGap
+## Author: Rainrider
+## Version: 0.1
+## Notes: Tells hunters what pet to summon in a group to fill a buff/debuff gap
+## OptionalDeps: LibStub, CallbackHandler-1.0, LibTalentQuery-1.0
+
+core.lua

@@ -221,6 +221,8 @@ function ftg:INSPECT_READY(event, guid)
 		else
 			GroupSpecs[spec] = GroupSpecs[spec] + 1
 		end
+
+		GroupCache[guid]["spec"] = spec
 	end
 
 	-- we cached it, so dismiss further notifications about this unit

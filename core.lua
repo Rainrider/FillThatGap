@@ -164,7 +164,7 @@ local QueueInspect = function(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
 
 	for guid in pairs(UnitsAwaitingInspect) do
-		local name = GroupCache[guid]["name"]
+		local name = GroupCache[guid]["name"]		-- TODO: error attempted to index field "?" (a nil value)
 		if (CanInspect(name) and self.elapsed >= INSPECT_FREQ) then -- TODO: check whether the IspectFrame is open. This causes issues?
 			self.elapsed = 0
 			Debug("|cff00ffffQueing inspect for", name, "|r")
@@ -227,7 +227,6 @@ function ftg:INSPECT_READY(event, guid)
 	Debug("Got data for", name, "spec:", spec)
 	ClearInspectPlayer(name)
 	UnitsAwaitingInspect[guid] = nil
-	DevTools_Dump(GroupSpecs)
 end
 
 function ftg:CleanGroupCache()
@@ -249,8 +248,6 @@ function ftg:CleanGroupCache()
 			Debug(name, "is no more a group member. Removed")
 		end
 	end
-
-	DevTools_Dump(GroupSpecs)
 end
 
 function ftg:ScanGroup()
@@ -272,14 +269,28 @@ function ftg:ScanGroup()
 				name = realm and name.."-"..realm or name
 				Debug("Added:", name)
 
-				UnitsAwaitingInspect[guid] = true
-				GroupCache[guid] = {}				-- TODO: consider meta tables
-				GroupCache[guid]["name"] = name
+				if (name) then -- UnitName fails sometimes???
+					UnitsAwaitingInspect[guid] = true
+					GroupCache[guid] = {}				-- TODO: consider meta tables
+					GroupCache[guid]["name"] = name
+				else
+					Debug("Unable to retrieve name for", unitid)
+				end
 			end
 		end
 	end
 
 	self:Show()
+end
+
+function ftg:DebugTables(tbl)
+	if tbl == 1 then
+		DevTools_Dump(UnitsAwaitingInspect)
+	elseif tbl == 2 then
+		DevTools_Dump(GroupCache)
+	else
+		DevTools_Dump(GroupSpecs)
+	end
 end
 
 function ftg:GROUP_ROSTER_UPDATE(event)
